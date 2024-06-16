@@ -1,0 +1,109 @@
+version: '3.8'
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: postgresql-feefo
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: f33f0
+      POSTGRES_DB: feefo
+    ports:
+      - 5432:5432
+    volumes:
+      - ./postgres-data:/var/lib/postgresql/data
+    networks:
+      - feefo-network
+    healthcheck:
+        test: ["CMD-SHELL", "pg_isready -d feefo -U postgres"]
+        interval: 5s
+        timeout: 10s
+        retries: 10      
+
+  backend:
+    build:
+      context: ../../backend-normalize-api
+      dockerfile: Dockerfile
+    container_name: backend-feefo
+    ports:
+      - "8080:8080"
+    depends_on:
+      postgres:
+          condition: service_healthy
+    environment:
+      - DATABASE_HOSTNAME=postgres:5432
+      - DATABASE_NAME=feefo
+      - DATABASE_USERNAME=postgres
+      - DATABASE_PASSWORD=f33f0
+    networks:
+      - feefo-network
+    volumes:
+      - shared:/shared      
+
+  sonarqube:
+    image: sonarqube:latest
+    container_name: sonar
+    ports:
+      - "9000:9000"
+      - "9092:9092"
+    environment:
+      - SONARQUBE_HOME=/opt/sonarqube
+      - SONAR_VERSION=10.1.0.73491
+      - SQ_DATA_DIR=/opt/sonarqube/data
+      - SQ_EXTENSIONS_DIR=/opt/sonarqube/extensions
+      - SQ_LOGS_DIR=/opt/sonarqube/logs
+      - SQ_TEMP_DIR=/opt/sonarqube/temp
+    volumes:
+      - ./sonarqube_data:/opt/sonarqube/data
+      - ./sonarqube_extensions:/opt/sonarqube/extensions
+      - ./sonarqube_logs:/opt/sonarqube/logs
+      - ./sonarqube_temp:/opt/sonarqube/temp
+    networks:
+      - feefo-network      
+
+  sonarqube_token_creator:
+    image: badouralix/curl-jq
+    container_name: sonar-token-feefo
+    depends_on:
+      - sonarqube
+    entrypoint: >
+      sh -c "
+      while ! curl -s http://sonarqube:9000/api/system/status | grep -q 'UP'; do
+        echo 'Waiting for SonarQube to start...';
+        sleep 5;
+      done;
+      echo 'SonarQube is ready. Creating user...';
+      curl -s -u admin:admin -X POST 'http://sonarqube:9000/api/users/create' -d 'login=feefo&name=feefo%20User&password=f33f0&password_confirmation=f33f0';
+      echo 'User created. Assigning permissions...';
+      curl -s -u admin:admin -X POST 'http://sonarqube:9000/api/permissions/add_user' -d 'login=feefo&permission=admin';
+      curl -s -u admin:admin -X POST 'http://sonarqube:9000/api/permissions/add_user' -d 'login=feefo&permission=scan';
+      curl -s -u admin:admin -X POST 'http://sonarqube:9000/api/permissions/add_user' -d 'login=feefo&permission=provisioning';
+      echo 'Permissions assigned. Generating the token...';
+      echo 'Changing admin password...';
+      curl -s -u admin:admin -X POST 'http://sonarqube:9000/api/users/change_password' -d 'login=admin&password=f33f0&previousPassword=admin';
+      echo 'Revoking old token...';
+      curl -s -u feefo:f33f0 -X POST 'http://sonarqube:9000/api/user_tokens/revoke' -d 'login=feefo&name=token-feefo'
+      echo 'Generating new token...';
+      token=$(curl -s -u feefo:f33f0 -X POST 'http://sonarqube:9000/api/user_tokens/generate' -d 'name=token-feefo' | jq -r '.token');
+      echo \"Generated Token: $$token\";
+      echo \"$$token\" > /tmp/sonar_token.txt;
+      cp /tmp/sonar_token.txt /shared/sonar_token.txt;
+      "
+    networks:
+      - feefo-network
+    volumes:
+      - shared:/shared      
+
+  frontend:
+    build:
+      context: ../../ui-assessment
+      dockerfile: Dockerfile
+    container_name: frontend-feefo
+    ports:
+      - "3000:80"
+      
+networks:
+  feefo-network:
+    driver: bridge     
+
+volumes:
+  shared:
