@@ -24,8 +24,8 @@ The project consists of the following services:
 Clone the project repository to your local machine.
 
 ```sh
-git clone https://github.com/roaugusto/feefo.git
-cd feefo
+git clone https://github.com/roaugusto/feefo-tech-assessment.git
+cd feefo-tech-assessment
 ```
 
 ### 2. Navigate to the Docker folder:
