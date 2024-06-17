@@ -40,7 +40,6 @@ Provided with a list of ideal (normalized) job titles, the process returns the b
 ### Prerequisites
 - Docker and Docker Compose installed
 - Java 17 or higher
-- Node.js and npm
 
 ### Configuration Instructions
 
