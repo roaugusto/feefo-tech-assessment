@@ -6,7 +6,7 @@ Provided with a list of ideal (normalized) job titles, the process returns the b
 
 ### Backend
 - Java with Spring Boot for business logic, data persistence, and communication with external services.
-- PostgreSQL database for storing data of organizations, donations, and sent emails.
+- PostgreSQL database for storing data of job titles.
 - Migrations were utilized for database schema management and version control.
 
 ### Additional Tools
