@@ -39,7 +39,7 @@ Provided with a list of ideal (normalized) job titles, the process returns the b
 
 ### Prerequisites
 - Docker and Docker Compose installed
-- Java 17 or higher
+- Java 17
 
 ### Configuration Instructions
 
@@ -83,6 +83,7 @@ Provided with a list of ideal (normalized) job titles, the process returns the b
 
 Before starting the backend, make sure to have the following environment variables configured:
 
+    export JAVA_HOME=/path/to/java17
     export DATABASE_HOSTNAME="localhost:5432"
     export DATABASE_NAME="feefo"
     export DATABASE_PASSWORD="f33f0"
@@ -90,11 +91,27 @@ Before starting the backend, make sure to have the following environment variabl
     export SONAR_HOST_URL="http://localhost:9000"
     export SONAR_PROJECT_KEY="feefo"
     export SONAR_TOKEN=<previously obtained sonar token>
+##### Setting Environment Variables on Windows
+
+    set JAVA_HOME=/path/to/java17
+    set DATABASE_HOSTNAME="localhost:5432"
+    set DATABASE_NAME="feefo"
+    set DATABASE_PASSWORD="f33f0"
+    set DATABASE_USERNAME="postgres"
+    set SONAR_HOST_URL="http://localhost:9000"
+    set SONAR_PROJECT_KEY="feefo"
+    set SONAR_TOKEN=<previously obtained sonar token>
 
 #### Running SonarQube Code Analysis
 
-Before running SonarQube code analysis, ensure you have configured the SonarQube variables in your 
-environment, mentioned above and run the following command:
+Before running SonarQube code analysis, ensure you have configured the SonarQube variables in your environment. Then, navigate to the root folder of the project and execute:
+
+```sh
+./gradlew clean build
+```
+
+After the build is complete, run the following command:
+
 
 ```sh
 ./gradlew runSonar
@@ -103,9 +120,9 @@ environment, mentioned above and run the following command:
 The runSonar task is set up to upload code analysis results to your SonarQube server, enabling continuous code quality monitoring.
 
 
-#### Note:
-Remember to stop the respective containers if they are running locally to avoid conflicts.
-
+### Note:
+- A new SonarQube token is generated each time docker-compose is executed.
+- Remember to stop the respective containers if they are running locally to avoid conflicts.
 
 ### Tools and Services
 
