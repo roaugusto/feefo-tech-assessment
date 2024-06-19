@@ -94,12 +94,12 @@ Before starting the backend, make sure to have the following environment variabl
 ##### Setting Environment Variables on Windows
 
     set JAVA_HOME=/path/to/java17
-    set DATABASE_HOSTNAME="localhost:5432"
-    set DATABASE_NAME="feefo"
-    set DATABASE_PASSWORD="f33f0"
-    set DATABASE_USERNAME="postgres"
-    set SONAR_HOST_URL="http://localhost:9000"
-    set SONAR_PROJECT_KEY="feefo"
+    set DATABASE_HOSTNAME=localhost:5432
+    set DATABASE_NAME=feefo
+    set DATABASE_PASSWORD=f33f0
+    set DATABASE_USERNAME=postgres
+    set SONAR_HOST_URL=http://localhost:9000
+    set SONAR_PROJECT_KEY=feefo
     set SONAR_TOKEN=<previously obtained sonar token>
 
 #### Running SonarQube Code Analysis
